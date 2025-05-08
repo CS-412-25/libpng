@@ -267,7 +267,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   png_get_eXIf(png_handler.png_ptr, png_handler.info_ptr, (png_bytepp)&exif_ptr);
   SAFE_DEREF(exif_ptr)
 
-  volatile png_uint_32 exif_cnt;
+  png_uint_32 exif_cnt;
   png_get_eXIf_1(png_handler.png_ptr, png_handler.info_ptr, (png_uint_32p)&exif_cnt, &exif_ptr);
   SAFE_DEREF(exif_ptr)
 
