@@ -22,7 +22,7 @@
 #define PNG_INTERNAL
 #include "png.h"
 
-#define SAFE_DEREF(ptr) {if ((ptr) != NULL) *(ptr)};
+#define SAFE_DEREF(ptr) {if ((ptr) != NULL) *(ptr);}
 
 #define PNG_CLEANUP \
   if(png_handler.png_ptr) \
