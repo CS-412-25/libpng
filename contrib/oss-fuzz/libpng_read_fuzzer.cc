@@ -22,6 +22,8 @@
 #define PNG_INTERNAL
 #include "png.h"
 
+#define SAFE_DEREF(ptr) {if ((ptr) != NULL) *(ptr)};
+
 #define PNG_CLEANUP \
   if(png_handler.png_ptr) \
   { \
@@ -184,6 +186,163 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   png_set_packing(png_handler.png_ptr);
   png_set_scale_16(png_handler.png_ptr);
   png_set_tRNS_to_alpha(png_handler.png_ptr);
+
+  // TODO: tmp call all getters
+  png_get_valid(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_rows(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_image_width(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_image_height(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_bit_depth(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_color_type(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_filter_type(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_interlace_type(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_compression_type(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_pixels_per_meter(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_x_pixels_per_meter(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_y_pixels_per_meter(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_pixel_aspect_ratio(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_pixel_aspect_ratio_fixed(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_x_offset_pixels(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_y_offset_pixels(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_x_offset_microns(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_y_offset_microns(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_pixels_per_inch(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_x_pixels_per_inch(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_y_pixels_per_inch(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_x_offset_inches(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_y_offset_inches(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_signature(png_handler.png_ptr, png_handler.info_ptr);
+  png_get_channels(png_handler.png_ptr, png_handler.info_ptr);
+
+  // TODO: double check if this doesn't optimize away the deref
+  volatile png_color_16p color_info;
+  png_get_bKGD(png_handler.png_ptr, png_handler.info_ptr, &color_info);
+  SAFE_DEREF(color_info)
+
+  double values[9];
+  png_get_cHRM(png_handler.png_ptr, png_handler.info_ptr, &values[0], &values[1], &values[2], &values[3], &values[4], &values[5], &values[6], &values[7]);
+
+  png_get_cHRM_XYZ(png_handler.png_ptr, png_handler.info_ptr, &values[0], &values[1], &values[2], &values[3], &values[4], &values[5], &values[6], &values[7], &values[8]);
+
+  png_fixed_point values_fixed[9];
+  png_get_cHRM_XYZ_fixed(png_handler.png_ptr, png_handler.info_ptr,&values_fixed[0], &values_fixed[1], &values_fixed[2], &values_fixed[3], &values_fixed[4], &values_fixed[5], &values_fixed[6], &values_fixed[7], &values_fixed[8]);
+
+  png_get_gAMA_fixed(png_handler.png_ptr, png_handler.info_ptr, &values_fixed[0]);
+  png_get_gAMA(png_handler.png_ptr, png_handler.info_ptr, &values[0]);
+
+  int random_int;
+  png_get_sRGB(png_handler.png_ptr, png_handler.info_ptr, &random_int);
+
+  volatile png_charp iccp_name;
+  int iccp_compression_type;
+  volatile png_bytep iccp_profile;
+  png_uint_32 iccp_profile_len;
+
+  png_get_iCCP(png_handler.png_ptr, png_handler.info_ptr, &icp_name, &iccp_compression_type, &iccp_profile, &iccp_profile_len);
+  SAFE_DEREF(iccp_name)
+  for (png_uint_32 cnt = 0; cnt < iccp_profile_len && iccp_profile != NULL; ++cnt) {
+      SAFE_DEREF(iccp_profile + cnt)
+  }
+
+  png_sPLT_tp splt_pointer;
+  png_get_sPLT(png_handler.png_ptr, png_handler.info_ptr, &splt_pointer);
+
+  png_byte cicp_1, cicp_2, cicp_3, cicp_4;
+  png_get_cICP(png_handler.png_ptr, png_handler.info_ptr, &cicp_1, &cicp_2, &cicp_3, &cicp_4);
+
+  png_uint_32 clli_1_f, clli_2_f;
+  png_get_cLLI_fixed(png_handler.png_ptr, png_handler.info_ptr, &clli_1_f, &clli_2_f);
+
+  double clli_1, clli_2;
+  png_get_cLLI(png_handler.png_ptr, png_handler.info_ptr, &clli_1, &clli_2);
+
+  png_fixed_point mdcv_ptrs[8];
+  png_uint_32 mdcv_uints[2];
+  png_get_mDCV_fixed(png_handler.png_ptr, png_handler.info_ptr,&mdcv_ptrs[0], &mdcv_ptrs[1], &mdcv_ptrs[2], &mdcv_ptrs[3], &mdcv_ptrs[4], &mdcv_ptrs[5], &mdcv_ptrs[6], &mdcv_ptrs[7], &mdcv_uints[0], &mdcv_uints[1]);
+
+  double mdcv_doubles[10];
+  png_get_mDCV(png_handler.png_ptr, png_handler.info_ptr,&mdcv_doubles[0], &mdcv_doubles[1], &mdcv_doubles[2], &mdcv_doubles[3], &mdcv_doubles[4], &mdcv_doubles[5], &mdcv_doubles[6], &mdcv_doubles[7], &mdcv_doubles[0], &mdcv_doubles[1]);
+
+  volatile png_bytep exif_ptr;
+  png_get_eXIf(png_handler.png_ptr, png_handler.info_ptr, &exif_ptr);
+  SAFE_DEREF(exif_ptr)
+
+  png_uint_32 exif_cnt;
+  png_get_eXIf_1(png_handler.png_ptr, png_handler.info_ptr, &exif_cnt, &exif_ptr);
+  SAFE_DEREF(exif_ptr)
+
+  volatile png_uint_16p hist_ptr;
+  png_get_hIST(png_handler.png_ptr, png_handler.info_ptr, &hist_ptr);
+  SAFE_DEREF(hist_ptr)
+
+  png_int_32 offs_ptrs[2];
+  int offs_int;
+  png_get_oFFs(png_handler.png_ptr, png_handler.info_ptr, &offs_ptrs[0], &offs_ptrs[1], &offs_int);
+
+  volatile png_charp pcal_char[2];
+  png_int_32 pcal_int[2];
+  volatile png_charpp pcal_params;
+
+  png_get_pCAL(png_handler.png_ptr, png_handler.info_ptr, &pcal_char[0], &pcal_int[0], &pcal_int[1], &pcal_char[1], &pcal_params);
+  SAFE_DEREF(pcal_char)
+  SAFE_DEREF(pcal_char + 1)
+  SAFE_DEREF(pcal_params)
+
+  int scal_int_f;
+  png_fixed_point scal_ptrs_f[2];
+  png_get_sCAL_fixed(png_handler.png_ptr, png_handler.info_ptr, &scal_int_f, &scal_ptrs_f[0], &scal_ptrs_f[1]);
+
+  int scals_unit;
+  volatile png_charp scals_ptrs[2];
+  png_get_sCAL_s(png_handler.png_ptr, png_handler.info_ptr, &scals_unit, &scals_ptrs[0], &scals_ptrs[1]);
+  SAFE_DEREF(scals_ptrs)
+  SAFE_DEREF(scals_ptrs + 1)
+
+  png_uint_32 phys_ptrs[2];
+  int phys_int;
+  png_get_pHYs(png_handler.png_ptr, png_handler.info_ptr, &phys_ptrs[0], &phys_ptrs[1], &phys_int);
+
+  volatile png_colorp plte_color;
+  int plte_int;
+  png_get_PLTE(png_handler.png_ptr, png_handler.info_ptr, &plte_color, &plte_int);
+  for (int cnt = 0; cnt < plte_int && plte_color != NULL; ++cnt) {
+      SAFE_DEREF(plte_color + cnt)
+  }
+
+  volatile png_color_8p sbit_stuff;
+  png_get_sBIT(png_handler.png_ptr, png_handler.info_ptr, &sbit_stuf);
+  SAFE_DEREF(sbit_stuff)
+
+  volatile png_textp text_ptr;
+  int text_len;
+  png_get_text(png_handler.png_ptr, png_handler.info_ptr, &text_ptr, &text_len);
+  for (int cnt = 0; cnt < text_len && text_ptr != NULL; ++cnt) {
+      SAFE_DEREF(text_ptr + cnt)
+  }
+
+  volatile png_timep time_ptr;
+  png_get_tIME(png_handler.png_ptr, png_handler.info_ptr, &time_ptr);
+  SAFE_DEREF(time_ptr)
+
+  png_bytep trns_ptr;
+  int trns_int;
+  png_color_16p trns_color;
+  png_get_tRNS(png_handler.png_ptr, png_handler.info_ptr, &trns_ptr, &trns_int, &trns_color);
+
+  volatile png_unknown_chunkp unk_ptr;
+  png_get_unknown_chunks(png_handler.png_ptr, png_handler.info_ptr, &unk_ptr);
+  SAFE_DEREF(unk_ptr)
+
+  png_get_rgb_to_gray_status(png_handler.png_ptr);
+  png_get_user_chunk_ptr(png_handler.png_ptr);
+  png_get_compression_buffer_size(png_handler.png_ptr);
+  png_get_user_width_max(png_handler.png_ptr);
+  png_get_user_height_max(png_handler.png_ptr);
+  png_get_chunk_cache_max(png_handler.png_ptr);
+  png_get_chunk_malloc_max(png_handler.png_ptr);
+  png_get_io_state(png_handler.png_ptr);
+  png_get_io_chunk_type(png_handler.png_ptr);
+  png_get_palette_max(png_handler.png_ptr, png_handler.info_ptr);
 
   int passes = png_set_interlace_handling(png_handler.png_ptr);
 
