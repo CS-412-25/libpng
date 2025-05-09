@@ -22,7 +22,8 @@
 #define PNG_INTERNAL
 #include "png.h"
 
-#define SAFE_DEREF(ptr) {if ((ptr) != NULL) *(ptr);}
+void* x;
+#define SAFE_DEREF(ptr) {if ((ptr) != NULL) x = *(ptr);}
 
 #define PNG_CLEANUP \
   if(png_handler.png_ptr) \
@@ -215,6 +216,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   png_get_channels(png_handler.png_ptr, png_handler.info_ptr);
 
   // TODO: double check if this doesn't optimize away the deref
+  // volatile works but too slow, probably accumulate stuff in  a global var maybe faster not sure
   png_color_16p color_info;
   png_get_bKGD(png_handler.png_ptr, png_handler.info_ptr, (png_color_16pp)&color_info);
   SAFE_DEREF(color_info)
