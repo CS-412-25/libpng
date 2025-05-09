@@ -22,8 +22,18 @@
 #define PNG_INTERNAL
 #include "png.h"
 
-void* x;
-#define SAFE_DEREF(ptr) {if ((ptr) != NULL) x = *(ptr);}
+png_color_16 __g_png_color_16;
+png_color_8 __g_png_color_8;
+png_color __g_png_color;
+png_text __g_png_text;
+png_char __g_png_char;
+png_charp __g_png_charp;
+png_byte __g_png_byte;
+png_uint_16 __g_png_uint_16;
+png_time __g_png_time;
+png_unknown_chunk __g_png_unknown_chunk;
+
+#define SAFE_DEREF(ptr, res_type) {if ((ptr) != NULL) __g_ ## res_type = *(ptr);}
 
 #define PNG_CLEANUP \
   if(png_handler.png_ptr) \
@@ -219,7 +229,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   // volatile works but too slow, probably accumulate stuff in  a global var maybe faster not sure
   png_color_16p color_info;
   png_get_bKGD(png_handler.png_ptr, png_handler.info_ptr, (png_color_16pp)&color_info);
-  SAFE_DEREF(color_info)
+  SAFE_DEREF(color_info, png_color_16)
 
   double values[9];
   png_get_cHRM(png_handler.png_ptr, png_handler.info_ptr, &values[0], &values[1], &values[2], &values[3], &values[4], &values[5], &values[6], &values[7]);
@@ -241,9 +251,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   png_uint_32 iccp_profile_len;
 
   png_get_iCCP(png_handler.png_ptr, png_handler.info_ptr, (png_charpp)&iccp_name, &iccp_compression_type, (png_bytepp)&iccp_profile, &iccp_profile_len);
-  SAFE_DEREF(iccp_name)
+  SAFE_DEREF(iccp_name, png_char)
   for (png_uint_32 cnt = 0; cnt < iccp_profile_len && iccp_profile != NULL; ++cnt) {
-      SAFE_DEREF(iccp_profile + cnt)
+      SAFE_DEREF(iccp_profile + cnt, png_byte)
   }
 
   png_sPLT_tp splt_pointer;
@@ -267,15 +277,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   png_bytep exif_ptr;
   png_get_eXIf(png_handler.png_ptr, png_handler.info_ptr, (png_bytepp)&exif_ptr);
-  SAFE_DEREF(exif_ptr)
+  SAFE_DEREF(exif_ptr, png_byte)
 
   png_uint_32 exif_cnt;
   png_get_eXIf_1(png_handler.png_ptr, png_handler.info_ptr, &exif_cnt, (png_bytepp)&exif_ptr);
-  SAFE_DEREF(exif_ptr)
+  SAFE_DEREF(exif_ptr, png_byte)
 
   png_uint_16p hist_ptr;
   png_get_hIST(png_handler.png_ptr, png_handler.info_ptr, (png_uint_16pp)&hist_ptr);
-  SAFE_DEREF(hist_ptr)
+  SAFE_DEREF(hist_ptr, png_uint_16)
 
   png_int_32 offs_ptrs[2];
   int offs_int;
@@ -287,9 +297,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   png_charpp pcal_params;
 
   png_get_pCAL(png_handler.png_ptr, png_handler.info_ptr, (png_charpp)&pcal_char[0], &pcal_int[0], &pcal_int[1], &pcal_int2[0], &pcal_int2[1], (png_charpp)&pcal_char[1], (png_charpp*)&pcal_params);
-  SAFE_DEREF(pcal_char)
-  SAFE_DEREF(pcal_char + 1)
-  SAFE_DEREF(pcal_params)
+  SAFE_DEREF(pcal_char, png_char)
+  SAFE_DEREF(pcal_char + 1, png_char)
+  SAFE_DEREF(pcal_params, png_charp)
 
   int scal_int_f;
   png_fixed_point scal_ptrs_f[2];
@@ -298,8 +308,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   int scals_unit;
   png_charp scals_ptrs[2];
   png_get_sCAL_s(png_handler.png_ptr, png_handler.info_ptr, &scals_unit, (png_charpp)&scals_ptrs[0], (png_charpp)&scals_ptrs[1]);
-  SAFE_DEREF(scals_ptrs)
-  SAFE_DEREF(scals_ptrs + 1)
+  SAFE_DEREF(scals_ptrs, png_char)
+  SAFE_DEREF(scals_ptrs + 1, png_char)
 
   png_uint_32 phys_ptrs[2];
   int phys_int;
@@ -309,23 +319,23 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   int plte_int;
   png_get_PLTE(png_handler.png_ptr, png_handler.info_ptr, (png_colorpp)&plte_color, &plte_int);
   for (int cnt = 0; cnt < plte_int && plte_color != NULL; ++cnt) {
-      SAFE_DEREF(plte_color + cnt)
+      SAFE_DEREF(plte_color + cnt, png_color)
   }
 
   png_color_8p sbit_stuff;
   png_get_sBIT(png_handler.png_ptr, png_handler.info_ptr, (png_color_8pp)&sbit_stuff);
-  SAFE_DEREF(sbit_stuff)
+  SAFE_DEREF(sbit_stuff, png_color_8)
 
   png_textp text_ptr;
   int text_len;
   png_get_text(png_handler.png_ptr, png_handler.info_ptr, (png_textpp)&text_ptr, &text_len);
   for (int cnt = 0; cnt < text_len && text_ptr != NULL; ++cnt) {
-      SAFE_DEREF(text_ptr + cnt)
+      SAFE_DEREF(text_ptr + cnt, png_text)
   }
 
   png_timep time_ptr;
   png_get_tIME(png_handler.png_ptr, png_handler.info_ptr, (png_timepp)&time_ptr);
-  SAFE_DEREF(time_ptr)
+  SAFE_DEREF(time_ptr, png_time)
 
   png_bytep trns_ptr;
   int trns_int;
@@ -334,7 +344,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   png_unknown_chunkp unk_ptr;
   png_get_unknown_chunks(png_handler.png_ptr, png_handler.info_ptr, (png_unknown_chunkpp)&unk_ptr);
-  SAFE_DEREF(unk_ptr)
+  SAFE_DEREF(unk_ptr, png_unknown_chunk)
 
   png_get_rgb_to_gray_status(png_handler.png_ptr);
   png_get_user_chunk_ptr(png_handler.png_ptr);
