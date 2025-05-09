@@ -227,7 +227,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   // TODO: double check if this doesn't optimize away the deref
   // volatile works but too slow, probably accumulate stuff in  a global var maybe faster not sure
-  png_color_16p color_info;
+  png_color_16p color_info = NULL;
   png_get_bKGD(png_handler.png_ptr, png_handler.info_ptr, (png_color_16pp)&color_info);
   SAFE_DEREF(color_info, png_color_16)
 
@@ -245,9 +245,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   int random_int;
   png_get_sRGB(png_handler.png_ptr, png_handler.info_ptr, &random_int);
 
-  png_charp iccp_name;
+  png_charp iccp_name = NULL;
   int iccp_compression_type;
-  png_bytep iccp_profile;
+  png_bytep iccp_profile = NULL;
   png_uint_32 iccp_profile_len;
 
   png_get_iCCP(png_handler.png_ptr, png_handler.info_ptr, (png_charpp)&iccp_name, &iccp_compression_type, (png_bytepp)&iccp_profile, &iccp_profile_len);
@@ -275,15 +275,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   double mdcv_doubles[10];
   png_get_mDCV(png_handler.png_ptr, png_handler.info_ptr,&mdcv_doubles[0], &mdcv_doubles[1], &mdcv_doubles[2], &mdcv_doubles[3], &mdcv_doubles[4], &mdcv_doubles[5], &mdcv_doubles[6], &mdcv_doubles[7], &mdcv_doubles[0], &mdcv_doubles[1]);
 
-  png_bytep exif_ptr;
+  png_bytep exif_ptr = NULL;
   png_get_eXIf(png_handler.png_ptr, png_handler.info_ptr, (png_bytepp)&exif_ptr);
   SAFE_DEREF(exif_ptr, png_byte)
 
   png_uint_32 exif_cnt;
+  exif_ptr = NULL;
   png_get_eXIf_1(png_handler.png_ptr, png_handler.info_ptr, &exif_cnt, (png_bytepp)&exif_ptr);
   SAFE_DEREF(exif_ptr, png_byte)
 
-  png_uint_16p hist_ptr;
+  png_uint_16p hist_ptr = NULL;
   png_get_hIST(png_handler.png_ptr, png_handler.info_ptr, (png_uint_16pp)&hist_ptr);
   SAFE_DEREF(hist_ptr, png_uint_16)
 
@@ -291,10 +292,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   int offs_int;
   png_get_oFFs(png_handler.png_ptr, png_handler.info_ptr, &offs_ptrs[0], &offs_ptrs[1], &offs_int);
 
-  png_charp pcal_char[2];
+  png_charp pcal_char[2] = {NULL, NULL};
   png_int_32 pcal_int[2];
   int pcal_int2[2];
-  png_charpp pcal_params;
+  png_charpp pcal_params = NULL;
 
   png_get_pCAL(png_handler.png_ptr, png_handler.info_ptr, (png_charpp)&pcal_char[0], &pcal_int[0], &pcal_int[1], &pcal_int2[0], &pcal_int2[1], (png_charpp)&pcal_char[1], (png_charpp*)&pcal_params);
   SAFE_DEREF(pcal_char[0], char)
@@ -306,7 +307,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   png_get_sCAL_fixed(png_handler.png_ptr, png_handler.info_ptr, &scal_int_f, &scal_ptrs_f[0], &scal_ptrs_f[1]);
 
   int scals_unit;
-  png_charp scals_ptrs[2];
+  png_charp scals_ptrs[2] = {NULL, NULL};
   png_get_sCAL_s(png_handler.png_ptr, png_handler.info_ptr, &scals_unit, (png_charpp)&scals_ptrs[0], (png_charpp)&scals_ptrs[1]);
   SAFE_DEREF(scals_ptrs[0], char)
   SAFE_DEREF(scals_ptrs[1], char)
@@ -315,34 +316,36 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   int phys_int;
   png_get_pHYs(png_handler.png_ptr, png_handler.info_ptr, &phys_ptrs[0], &phys_ptrs[1], &phys_int);
 
-  png_colorp plte_color;
+  png_colorp plte_color = NULL;
   int plte_int;
   png_get_PLTE(png_handler.png_ptr, png_handler.info_ptr, (png_colorpp)&plte_color, &plte_int);
   for (int cnt = 0; cnt < plte_int && plte_color != NULL; ++cnt) {
       SAFE_DEREF(plte_color + cnt, png_color)
   }
 
-  png_color_8p sbit_stuff;
+  png_color_8p sbit_stuff = NULL;
   png_get_sBIT(png_handler.png_ptr, png_handler.info_ptr, (png_color_8pp)&sbit_stuff);
   SAFE_DEREF(sbit_stuff, png_color_8)
 
-  png_textp text_ptr;
+  png_textp text_ptr = NULL;
   int text_len;
   png_get_text(png_handler.png_ptr, png_handler.info_ptr, (png_textpp)&text_ptr, &text_len);
   for (int cnt = 0; cnt < text_len && text_ptr != NULL; ++cnt) {
       SAFE_DEREF(text_ptr + cnt, png_text)
   }
 
-  png_timep time_ptr;
+  png_timep time_ptr = NULL;
   png_get_tIME(png_handler.png_ptr, png_handler.info_ptr, (png_timepp)&time_ptr);
   SAFE_DEREF(time_ptr, png_time)
 
-  png_bytep trns_ptr;
+  png_bytep trns_ptr = NULL;
   int trns_int;
-  png_color_16p trns_color;
+  png_color_16p trns_color = NULL;
   png_get_tRNS(png_handler.png_ptr, png_handler.info_ptr, &trns_ptr, &trns_int, &trns_color);
+  SAFE_DEREF(trns_ptr, png_byte)
+  SAFE_DEREF(trns_color, png_color_16)
 
-  png_unknown_chunkp unk_ptr;
+  png_unknown_chunkp unk_ptr = NULL;
   png_get_unknown_chunks(png_handler.png_ptr, png_handler.info_ptr, (png_unknown_chunkpp)&unk_ptr);
   SAFE_DEREF(unk_ptr, png_unknown_chunk)
 
