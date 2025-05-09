@@ -26,7 +26,7 @@ png_color_16 __g_png_color_16;
 png_color_8 __g_png_color_8;
 png_color __g_png_color;
 png_text __g_png_text;
-png_char __g_png_char;
+char __g_char;
 png_charp __g_png_charp;
 png_byte __g_png_byte;
 png_uint_16 __g_png_uint_16;
@@ -251,7 +251,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   png_uint_32 iccp_profile_len;
 
   png_get_iCCP(png_handler.png_ptr, png_handler.info_ptr, (png_charpp)&iccp_name, &iccp_compression_type, (png_bytepp)&iccp_profile, &iccp_profile_len);
-  SAFE_DEREF(iccp_name, png_char)
+  SAFE_DEREF(iccp_name, char)
   for (png_uint_32 cnt = 0; cnt < iccp_profile_len && iccp_profile != NULL; ++cnt) {
       SAFE_DEREF(iccp_profile + cnt, png_byte)
   }
