@@ -297,8 +297,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   png_charpp pcal_params;
 
   png_get_pCAL(png_handler.png_ptr, png_handler.info_ptr, (png_charpp)&pcal_char[0], &pcal_int[0], &pcal_int[1], &pcal_int2[0], &pcal_int2[1], (png_charpp)&pcal_char[1], (png_charpp*)&pcal_params);
-  SAFE_DEREF(pcal_char, char)
-  SAFE_DEREF(pcal_char + 1, char)
+  SAFE_DEREF(pcal_char[0], char)
+  SAFE_DEREF(pcal_char[1], char)
   SAFE_DEREF(pcal_params, png_charp)
 
   int scal_int_f;
@@ -308,8 +308,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   int scals_unit;
   png_charp scals_ptrs[2];
   png_get_sCAL_s(png_handler.png_ptr, png_handler.info_ptr, &scals_unit, (png_charpp)&scals_ptrs[0], (png_charpp)&scals_ptrs[1]);
-  SAFE_DEREF(scals_ptrs, char)
-  SAFE_DEREF(scals_ptrs + 1, char)
+  SAFE_DEREF(scals_ptrs[0], char)
+  SAFE_DEREF(scals_ptrs[1], char)
 
   png_uint_32 phys_ptrs[2];
   int phys_int;
