@@ -208,7 +208,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   int num_palette = 256; 
 
   // Allocate memory for palette
-  png_colorp palette = (png_colorp)malloc(num_palette * sizeof(png_color));
+  // png_colorp palette = (png_colorp)malloc(num_palette * sizeof(png_color));
+  png_color palette[num_palette];
 
   // Populate the palette with a gradient or other scheme
   for (int i = 0; i < num_palette; i++) {
@@ -251,6 +252,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   png_read_end(png_handler.png_ptr, png_handler.end_info_ptr);
 
+  //free(palette);
   PNG_CLEANUP
 
 #ifdef PNG_SIMPLIFIED_READ_SUPPORTED
