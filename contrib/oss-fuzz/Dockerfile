@@ -1,3 +1,7 @@
+# don't care about this one. for oss-fuzz run it with the Dockerfile in the ossfuzz repo
+
+
+
 # Copyright 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +24,7 @@ RUN apt-get update && \
     apt-get install -y make autoconf automake libtool
 
 RUN git clone --depth 1 https://github.com/madler/zlib.git
-RUN git clone --depth 1 https://github.com/glennrp/libpng.git
+#RUN git clone --depth 1 https://github.com/glennrp/libpng.git
+COPY 
 RUN cp libpng/contrib/oss-fuzz/build.sh $SRC
 WORKDIR libpng
